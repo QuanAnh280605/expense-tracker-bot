@@ -1,11 +1,16 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+from pathlib import Path
 import aiosqlite
 from config.settings import settings
 
 @asynccontextmanager
 async def get_connection() -> AsyncGenerator[aiosqlite.Connection, None]:
     """Async context manager quản lý kết nối tới SQLite database."""
+    # Tự động tạo thư mục chứa database nếu chưa tồn tại
+    db_file = Path(settings.db_path)
+    db_file.parent.mkdir(parents=True, exist_ok=True)
+
     async with aiosqlite.connect(settings.db_path) as conn:
         conn.row_factory = aiosqlite.Row
         yield conn
