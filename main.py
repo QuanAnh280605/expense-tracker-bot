@@ -2,6 +2,14 @@ import asyncio
 import logging
 import sys
 
+# Đảm bảo UTF-8 cho stdout/stderr trên Windows để in emoji không bị lỗi
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
@@ -22,17 +30,17 @@ logger = logging.getLogger(__name__)
 async def main():
     """Hàm khởi chạy chính của Telegram Bot."""
     if not settings.telegram_bot_token:
-        logger.error("❌ Chưa cấu hình TELEGRAM_BOT_TOKEN trong file .env!")
+        logger.error("Chua cau hinh TELEGRAM_BOT_TOKEN trong file .env!")
         print("\n[LỖI]: Vui lòng tạo file .env từ .env.example và điền TELEGRAM_BOT_TOKEN cùng GROQ_API_KEY trước khi chạy!\n")
         return
 
     if not settings.groq_api_key:
-        logger.warning("⚠️ Chưa cấu hình GROQ_API_KEY. Tính năng nhận diện AI có thể không hoạt động.")
+        logger.warning("Chua cau hinh GROQ_API_KEY. Tinh nang nhan dien AI co the khong hoat dong.")
 
     # 1. Khởi tạo Database
-    logger.info("📦 Đang khởi tạo cơ sở dữ liệu SQLite...")
+    logger.info("Dang khoi tao co so du lieu SQLite...")
     await init_db()
-    logger.info("✅ Cơ sở dữ liệu đã sẵn sàng.")
+    logger.info("Co so du lieu da san sang.")
 
     # 2. Khởi tạo Bot & Dispatcher
     bot = Bot(
@@ -50,21 +58,21 @@ async def main():
     # 4. Khởi chạy Scheduler nhắc nhở
     scheduler = setup_scheduler(bot)
     scheduler.start()
-    logger.info(f"⏰ Đã khởi chạy lịch nhắc nhở lúc {settings.reminder_hour:02d}:{settings.reminder_minute:02d} mỗi tối.")
+    logger.info(f"Da khoi chay lich nhac nho luc {settings.reminder_hour:02d}:{settings.reminder_minute:02d} moi toi.")
 
     # 5. Xóa webhook tồn đọng và bắt đầu Polling
     await bot.delete_webhook(drop_pending_updates=True)
-    logger.info("🚀 Bot đang chạy và lắng nghe tin nhắn...")
+    logger.info("Bot dang chay va lang nghe tin nhan tren Telegram...")
 
     try:
         await dp.start_polling(bot)
     finally:
         scheduler.shutdown()
         await bot.session.close()
-        logger.info("🛑 Bot đã dừng.")
+        logger.info("Bot da dung.")
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
-        logger.info("👋 Bot đã tắt.")
+        logger.info("Bot da tat.")

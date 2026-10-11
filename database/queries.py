@@ -1,10 +1,10 @@
-from datetime import datetime, date
+from datetime import date
 from typing import List, Dict, Any, Optional
 from database.db import get_connection
 
 async def register_user(user_id: int, username: Optional[str] = None) -> None:
     """Lưu hoặc cập nhật thông tin user."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         await conn.execute("""
             INSERT INTO users (user_id, username)
             VALUES (?, ?)
@@ -20,7 +20,7 @@ async def add_transaction(
     note: Optional[str] = None
 ) -> int:
     """Thêm một giao dịch mới và trả về ID."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         cursor = await conn.execute("""
             INSERT INTO transactions (user_id, amount, type, category, note)
             VALUES (?, ?, ?, ?, ?)
@@ -30,7 +30,7 @@ async def add_transaction(
 
 async def delete_transaction(transaction_id: int, user_id: int) -> bool:
     """Xóa một giao dịch (dùng cho chức năng Hủy)."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         cursor = await conn.execute("""
             DELETE FROM transactions
             WHERE id = ? AND user_id = ?
@@ -44,7 +44,7 @@ async def update_transaction_category(
     new_category: str
 ) -> bool:
     """Cập nhật danh mục cho một giao dịch."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         cursor = await conn.execute("""
             UPDATE transactions
             SET category = ?
@@ -55,7 +55,7 @@ async def update_transaction_category(
 
 async def get_transaction(transaction_id: int, user_id: int) -> Optional[Dict[str, Any]]:
     """Lấy thông tin 1 giao dịch."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         async with conn.execute("""
             SELECT id, user_id, amount, type, category, note, transaction_date
             FROM transactions
@@ -70,7 +70,7 @@ async def get_daily_expense(user_id: int, target_date: Optional[date] = None) ->
         target_date = date.today()
     date_str = target_date.strftime("%Y-%m-%d")
 
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         async with conn.execute("""
             SELECT COALESCE(SUM(amount), 0) as total
             FROM transactions
@@ -90,7 +90,7 @@ async def get_period_summary(
     Lấy báo cáo tổng hợp: Tổng thu, tổng chi và phân bổ theo danh mục chi tiêu.
     start_date, end_date dạng 'YYYY-MM-DD'
     """
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         # Tổng chi
         async with conn.execute("""
             SELECT COALESCE(SUM(amount), 0) as total_expense
@@ -135,7 +135,7 @@ async def get_period_summary(
 
 async def get_all_transactions(user_id: int, limit: int = 1000) -> List[Dict[str, Any]]:
     """Lấy danh sách các giao dịch để phục vụ xuất Excel."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         async with conn.execute("""
             SELECT id, transaction_date, type, amount, category, note
             FROM transactions
@@ -148,7 +148,7 @@ async def get_all_transactions(user_id: int, limit: int = 1000) -> List[Dict[str
 
 async def set_budget(user_id: int, category: str, monthly_limit: int) -> None:
     """Đặt hoặc cập nhật ngân sách cho một danh mục."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         await conn.execute("""
             INSERT INTO budgets (user_id, category, monthly_limit)
             VALUES (?, ?, ?)
@@ -160,7 +160,7 @@ async def get_budget_status(user_id: int, category: str) -> Optional[Dict[str, A
     """Kiểm tra tình trạng ngân sách của danh mục trong tháng hiện tại."""
     first_day_of_month = date.today().replace(day=1).strftime("%Y-%m-%d")
 
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         # Lấy hạn mức
         async with conn.execute("""
             SELECT monthly_limit FROM budgets
@@ -193,7 +193,7 @@ async def get_budget_status(user_id: int, category: str) -> Optional[Dict[str, A
 
 async def get_all_active_user_ids() -> List[int]:
     """Lấy danh sách user IDs để gửi thông báo nhắc nhở."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         async with conn.execute("SELECT user_id FROM users") as cursor:
             rows = await cursor.fetchall()
             return [row["user_id"] for row in rows]

@@ -1,15 +1,18 @@
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 import aiosqlite
 from config.settings import settings
 
-async def get_connection() -> aiosqlite.Connection:
-    """Tạo kết nối async tới SQLite database."""
-    conn = await aiosqlite.connect(settings.db_path)
-    conn.row_factory = aiosqlite.Row
-    return conn
+@asynccontextmanager
+async def get_connection() -> AsyncGenerator[aiosqlite.Connection, None]:
+    """Async context manager quản lý kết nối tới SQLite database."""
+    async with aiosqlite.connect(settings.db_path) as conn:
+        conn.row_factory = aiosqlite.Row
+        yield conn
 
 async def init_db() -> None:
     """Khởi tạo cấu trúc các bảng trong cơ sở dữ liệu."""
-    async with await get_connection() as conn:
+    async with get_connection() as conn:
         # 1. Bảng users
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
