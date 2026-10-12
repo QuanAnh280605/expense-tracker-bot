@@ -1,4 +1,4 @@
-name: Docker
+name: Docker & Deploy
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build & Push Multi-Arch Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,3 +40,23 @@ jobs:
           tags: |
             ghcr.io/quananh280605/expense-tracker-bot:latest
             ghcr.io/quananh280605/expense-tracker-bot:${{ github.sha }}
+
+  deploy:
+    name: Restart Pod on Kubernetes VPS
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: SSH to VPS & Rollout Restart
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER || 'ubuntu' }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script: |
+            echo "🔄 Tự động cập nhật Expense Tracker Bot trên K3s..."
+            kubectl rollout restart deployment/expense-bot -n expense-tracker
+            kubectl rollout status deployment/expense-bot -n expense-tracker --timeout=90s
+            echo "✅ Cập nhật thành công!"
+            kubectl get pods -n expense-tracker -l app=expense-bot
