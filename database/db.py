@@ -60,4 +60,46 @@ async def init_db() -> None:
             )
         """)
 
+        # Migration cho bảng users (thêm current_balance và is_balance_initialized nếu chưa có)
+        async with conn.execute("PRAGMA table_info(users)") as cursor:
+            user_columns = [row["name"] for row in await cursor.fetchall()]
+            if "current_balance" not in user_columns:
+                await conn.execute("ALTER TABLE users ADD COLUMN current_balance INTEGER DEFAULT 0")
+            if "is_balance_initialized" not in user_columns:
+                await conn.execute("ALTER TABLE users ADD COLUMN is_balance_initialized INTEGER DEFAULT 0")
+
+        # 4. Bảng funds (Quỹ tài chính)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS funds (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                balance INTEGER NOT NULL DEFAULT 0,
+                target_amount INTEGER DEFAULT 0,
+                icon TEXT DEFAULT '💰',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, name),
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            )
+        """)
+
+        # 5. Bảng fund_logs (Lịch sử biến động quỹ)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS fund_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fund_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                action_type TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                previous_balance INTEGER NOT NULL,
+                new_balance INTEGER NOT NULL,
+                note TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (fund_id) REFERENCES funds(id),
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            )
+        """)
+
         await conn.commit()
+

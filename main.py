@@ -16,7 +16,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from config.settings import settings
 from database.db import init_db
-from handlers import common, budget, report, expense
+from handlers import common, budget, report, fund, expense
 from schedulers.reminders import setup_scheduler
 
 # Cấu hình logging
@@ -49,11 +49,13 @@ async def main():
     )
     dp = Dispatcher()
 
-    # 3. Đăng ký các Router (Thứ tự quan trọng: common -> budget -> report -> expense cuối cùng)
+    # 3. Đăng ký các Router (Thứ tự quan trọng: common -> budget -> report -> fund -> expense cuối cùng)
     dp.include_router(common.router)
     dp.include_router(budget.router)
     dp.include_router(report.router)
+    dp.include_router(fund.router)
     dp.include_router(expense.router)
+
 
     # 4. Khởi chạy Scheduler nhắc nhở
     scheduler = setup_scheduler(bot)

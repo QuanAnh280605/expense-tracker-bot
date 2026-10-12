@@ -72,9 +72,22 @@ docker run -d --name my-expense-bot --restart always \
 
 ---
 
-## 📖 Danh Sách Lệnh
+## 📖 Danh Sách Lệnh & Giao Tiếp Ngôn Ngữ Tự Nhiên
+
+### 💬 Thao Tác Bằng Chat Tự Nhiên (Không Cần Gõ Lệnh)
+- **Cài đặt số dư:** `Set số dư hiện tại của tôi là 15 triệu`, `Ví tôi còn 5 củ`
+- **Tạo quỹ mới:** `Tạo quỹ Du lịch 3 củ`, `Lập quỹ Tiết kiệm với 5 triệu`, `Mở quỹ Mua xe`
+- **Set số tiền quỹ:** `Set quỹ Tiết kiệm 10 triệu`, `Đặt quỹ Du lịch thành 2tr`, `Quỹ Khẩn cấp có 5 củ`
+- **Xem ví & quỹ:** `Số dư của tôi còn bao nhiêu?`, `Xem danh sách quỹ`, `Các quỹ hiện có`
+- **Xóa quỹ:** `Xóa quỹ Du lịch`
+- **Ghi chép thu chi:** `Ăn trưa 40k`, `Đổ xăng 70k, cafe 25k`, `Nhận lương 20 củ` *(tự động cộng/trừ vào số dư)*
+
+### ⌨️ Lệnh Telegram Hỗ Trợ
 - `/start` - Khởi động và xem lời chào hướng dẫn
 - `/help` - Xem hướng dẫn chi tiết
+- `/sodu` - Xem số dư ví hiện tại, tiền trong quỹ và tiền khả dụng
+- `/quy` - Xem và quản lý danh sách các quỹ tài chính
 - `/baocao` - Xem thống kê và biểu đồ tròn thu chi
 - `/ngansach` - Xem hoặc cài đặt hạn mức chi tiêu tháng (vd: `/ngansach Ăn uống 3tr`)
 - `/export` - Xuất file Excel lịch sử thu chi (.xlsx)
+
