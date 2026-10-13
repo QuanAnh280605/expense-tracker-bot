@@ -5,6 +5,7 @@ WORKDIR /app
 # Cài đặt timezone và dependencies hệ thống
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
+    sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TZ=Asia/Ho_Chi_Minh
